@@ -1,5 +1,29 @@
+<!--
+  SearchBoxLiquidGlassContainer 带防抖的毛玻璃搜索框组件
+  versions 260504
+  
+  Props:
+    search_form_submit
+      - 类型: Function(searchValue[string]: inputValue)
+      - 默认: () => {}
+      - 说明: 表单提交回调，组件内部已做 500ms 防抖
+    delay
+      - 类型: Number
+      - 默认: 500
+      - 说明: 输入框输入内容后，触发表单提交回调的延迟时间，单位为毫秒
+
+  使用示例:
+    <SearchBoxLiquidGlassContainer
+      :search_form_submit="search_form_submit"
+      :delay="500"
+    />
+    const search_form_submit = (searchValue) => {
+        console.log(searchValue);
+    };
+-->
+
 <template>
-    <div class="glass_container">
+    <div class="glass_container" @click="() => inputRef.focus()">
         <div class="icon">
             <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" opacity="0.5">
                 <path
@@ -7,9 +31,45 @@
                     fill="#ffffff"></path>
             </svg>
         </div>
-        <input type="text" placeholder="搜索..." class="searchInput" name="search" />
+        <form class="search_form" @submit.prevent="handleSearch(searchValue)">
+            <input type="text" placeholder="搜索..." class="searchInput" name="search" ref="inputRef" v-model="searchValue" />
+        </form>
     </div>
 </template>
+
+<script setup>
+import { defineProps, ref, onUnmounted, useTemplateRef } from 'vue';
+
+const timer = ref(null);
+const inputRef = useTemplateRef('inputRef');
+const searchValue = ref('');
+
+const props = defineProps({
+    search_form_submit: {
+        type: Function,
+        default: () => {}
+    },
+    delay: {
+        type: Number,
+        default: 500
+    }
+});
+
+const handleSearch = function (...args) {
+    if (timer.value) clearTimeout(timer.value);
+
+    timer.value = setTimeout(() => {
+        props.search_form_submit(...args);
+    }, props.delay);
+};
+
+onUnmounted(() => {
+    if (timer.value) {
+        clearTimeout(timer.value);
+        timer.value = null;
+    }
+});
+</script>
 
 <style scoped>
 .glass_container {
@@ -28,7 +88,7 @@
     flex-direction: row;
     align-items: center;
     gap: 10px;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(120, 120, 120, 0.15);
     backdrop-filter: blur(16px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(255, 255, 255, 0.05) inset;
     transition: all 0.3s ease;
@@ -39,43 +99,21 @@
     height: 24px;
 }
 
+.search_form { 
+    width: 90%;
+}
+
 .searchInput {
     background-color: transparent;
     border: none;
     display: block;
     color: rgba(255, 255, 255, 0.8);
-    width: 80%;
+    width: 95%;
     height: 16px;
     line-height: 16px;
 }
 
 .searchInput:focus {
     outline: none;
-}
-
-.glass_container::after {
-    content: "";
-    position: absolute;
-    top: 45px;
-    left: -1px;
-    z-index: 999;
-    box-sizing: border-box;
-    width: 500px;
-    height: 0px;
-    padding: 0 10px;
-    border: 0 none transparent;
-    border-radius: 16px;
-    background-clip: padding-box;
-    background-color: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(255, 255, 255, 0.05) inset;
-    transition: all 0.3s ease;
-}
-
-.glass_container:focus-within::after {
-    height: 350px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-top-color: rgba(255, 255, 255, 0.3);
-    border-left-color: rgba(255, 255, 255, 0.3);
 }
 </style>
