@@ -11,11 +11,21 @@
       - 类型: Number
       - 默认: 500
       - 说明: 输入框输入内容后，触发表单提交回调的延迟时间，单位为毫秒
+    max_width
+      - 类型: Number
+      - 默认: 500
+      - 说明: 组件宽度 范围150-
+    max_height
+      - 类型: Number
+      - 默认: 35
+      - 说明: 组件高度 范围35-50
 
   使用示例:
     <SearchBoxLiquidGlassContainer
       :search_form_submit="search_form_submit"
       :delay="500"
+      :max_width="500"
+      :max_height="35"
     />
     const search_form_submit = (searchValue) => {
         console.log(searchValue);
@@ -52,6 +62,14 @@ const props = defineProps({
     delay: {
         type: Number,
         default: 500
+    },
+    max_width: {
+        type: Number,
+        default: 500
+    },
+    max_height: {
+        type: Number,
+        default: 35
     }
 });
 
@@ -75,9 +93,11 @@ onUnmounted(() => {
 .glass_container {
     position: relative;
     box-sizing: border-box;
-    width: 500px;
-    min-width: 100px;
-    height: 35px;
+    width: v-bind('max_width + "px"');
+    min-width: 150px;
+    height: v-bind('max_height + "px"');
+    min-height: 35px;
+    max-height: 50px;
     padding: 0 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-top-color: rgba(255, 255, 255, 0.3);
